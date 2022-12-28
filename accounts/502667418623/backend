@@ -1,0 +1,2 @@
+bucket = "uniteus-secops"
+key = "global/terraform/prisma_cloud/terraform.tfstate"

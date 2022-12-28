@@ -1,0 +1,2 @@
+bucket = "lch-terraform-backend"
+key = "global/terraform/prisma_cloud/terraform.tfstate"

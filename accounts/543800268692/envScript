@@ -1,0 +1,4 @@
+echo "Working in LCH PROD"
+export AWS_REGION=us-west-2
+nrk=$(aws ssm get-parameters --with-decryption --names "new_relic_key_prod_review" | jq '.Parameters[0].Value' -r)
+optTFVars="-var=new_relic_key=$nrk"

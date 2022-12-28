@@ -1,0 +1,8 @@
+
+*.0_x5
+.DS_Store
+accounts/.DS_Store
+accounts/*/.DS_Store
+.terraform
+accounts/*/.terraform
+.terraform.lock.hcl
