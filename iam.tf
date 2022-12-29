@@ -1,18 +1,7 @@
-## AWS Provider Block Intergrations ###
-# terraform {
-#   required_providers {
-#     aws = {
-#       source  = "hashicorp/aws"
-#       version = "~> 3.74.0"      
-#     }
-#   }
-# }
-
-## AWS Provider Block Intergrations ###
+#############################
+# Initializing the provider
+##############################
 provider "aws" {
-  # version = "~> 3.74.0"
-  # version = "~> 4.39.0"
-  # profile = "ps"
   # region = var.region
   alias = "default"
   default_tags {
@@ -28,26 +17,10 @@ provider "aws" {
 # passed in from a file via -backend-config arguments to 'terraform init'
 terraform {
   backend "s3" {
-    # key = "global/secops/prisma_cloud/terraform.tfstate"
   }
 }
 
-
-# variable "accounts" {
-#   description = "The name of the environment )"
-#   type        = string
-
-#   validation {
-#     condition     = contains(["438171280653", "452418757197", "804656202561", "819417623337", "089902810488", "102553174541", "543800268692"], var.accounts)
-#     error_message = "account hasn't been setup and not allowed:"
-#   }
-# }
-
-
-
-
-
-## Create Role for prisma cloud Intergrations ###
+## Create Prisma cloud Intergrations Roles ###
 
 resource "aws_iam_role" "PrismaCloud_role" {
   count = var.prismacloud
@@ -78,24 +51,22 @@ resource "aws_iam_role" "PrismaCloud_role" {
 
 }
 
-  # provisioner "local-exec" {
-  #   inline = ["echo \"Hello, World from $(uname -smp)\""]
-  # }
-
-
+# AWS SecurityAudit policy
 data "aws_iam_policy" "SecurityAudit" {
   arn = "arn:aws:iam::aws:policy/SecurityAudit"
 }
+#attaching SecurityAudit policy to PrismaCloud_role
 resource "aws_iam_role_policy_attachment" "SecurityAudit-policy-attach" {
   count      = var.prismacloud
   role       = aws_iam_role.PrismaCloud_role[count.index].name
   policy_arn = data.aws_iam_policy.SecurityAudit.arn
 }
 
-
+# AWS AWSSecurityHubReadOnlyAccess
 data "aws_iam_policy" "AWSSecurityHubReadOnlyAccess" {
   arn = "arn:aws:iam::aws:policy/AWSSecurityHubReadOnlyAccess"
 }
+#attaching SecurityAudit policy to role
 resource "aws_iam_role_policy_attachment" "AWSSecurityHubReadOnlyAccess-policy-attach" {
   count      = var.prismacloud
   role       = aws_iam_role.PrismaCloud_role[count.index].name
@@ -104,6 +75,8 @@ resource "aws_iam_role_policy_attachment" "AWSSecurityHubReadOnlyAccess-policy-a
     prevent_destroy = true
   }  
 }
+
+# AWS AWSSecurityHubFullAccess
 
 data "aws_iam_policy" "AWSSecurityHubFullAccess" {
   arn = "arn:aws:iam::aws:policy/AWSSecurityHubFullAccess"
@@ -114,6 +87,7 @@ resource "aws_iam_role_policy_attachment" "AWSSecurityHubFullAccess-policy-attac
   policy_arn = data.aws_iam_policy.AWSSecurityHubFullAccess.arn
 }
 
+# AWS AWSSecurityHubServiceRolePolicy
 
 data "aws_iam_policy" "AWSSecurityHubServiceRolePolicy" {
   arn = "arn:aws:iam::aws:policy/aws-service-role/AWSSecurityHubServiceRolePolicy"
@@ -124,7 +98,7 @@ resource "aws_iam_role_policy_attachment" "AWSSecurityHubServiceRolePolicy-polic
   policy_arn = data.aws_iam_policy.AWSSecurityHubServiceRolePolicy.arn
 }
 
-
+# Creating AWS aws_config_config_rules 
 resource "aws_config_config_rule" "aws_config_config_rule" {
   count = var.awsConfig
   name  = "${var.awsConfig}_rule"
